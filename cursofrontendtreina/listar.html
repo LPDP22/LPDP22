@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewpoint" content="width=device-width, intial-scale=1.0">
+    <title>Listar</title>
+
+
+<body>
+    <form action="/action_page.php" target="_blank" style="background-color: azure;">
+        <style>
+            table {
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+            }
+
+            td,
+            th {
+                border: 1px solid #dddddd;
+                text-align: left;
+                padding: 8px;
+            }
+
+            tr:nth-child(even) {
+                background-color: #dddddd;
+            }
+        </style>
+
+        <div class="container-fluid p-4 bg-primary text-white text-center">
+            <h1>Lista de Contatos</h1>
+        </div><br>
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+        <table>
+            <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>E-Mail</th>
+                <th>...</th>
+            </tr>
+            <tr>
+                <td>Lucas</td>
+                <td>(81)98785-2234</td>
+                <td>sacul@lucas.com</td>
+                <td><a href="alterar(update).html">Alterar</a>&nbsp;<a href="remover(delete).html">Remover</a></td>
+            </tr>
+            <tr>
+                <td>Luana</td>
+                <td>(81)94235-4331</td>
+                <td>camille@luana.com</td>
+                <td><a href="alterar(update).html">Alterar</a>&nbsp;<a href="remover(delete).html">Remover</a></td>
+            </tr>
+        </table><br>
+
+        <div class="row">
+
+            <div class="col p-3">
+                <a href="site de cadastro.html">Cadastrar</a>
+            </div>
+            <div class="col p-3">
+                <a href="curriculo.html">Currículo</a>
+            </div>
+            <div class="col p-3">
+                <a href="alterar(update).html">Novo Contato</a>
+            </div>
+            <div class="col p-3">
+                <a href="remover(delete).html">Remover</a>
+            </div><br>
+        </div>
+        </head>
+    </form>
+</body>
+
+</html>
