@@ -1,0 +1,557 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+typedef struct { 
+    int matricula;
+    int sexo;
+    int idade;
+    int cursos[4];
+    char nome[35];
+    int turno;
+    float mensalidade;
+} TCadastro;
+
+FILE *pAlunos;
+TCadastro cadastro_aux, cadastro_nulo;
+
+void linha() {
+    int i;
+    for (i = 1; i <= 150; i++)
+        printf("_");
+}
+
+
+void cabec() { 
+    system("cls");
+    linha();
+    printf(" FACULDADE SENAC ");
+    linha();
+}
+
+void abre_arquivo() {
+    pAlunos = fopen("aluno.txt", "r+b");
+    if (pAlunos == NULL)
+        pAlunos = fopen("aluno.txt", "w+b");
+}
+
+void limpar_arquivo() {
+    fclose(pAlunos);
+    pAlunos = fopen("aluno.txt", "w+b");
+    if (pAlunos == NULL) {
+        printf("Nada no arquivo. \n");
+        exit(1);
+    }
+}
+
+void inserir() {
+    int resp;
+    int respoCurso;
+    do {
+        cabec();
+        printf("\n\nCadastrar novo aluno\n\n");
+        printf("\nMatricula: ");
+        scanf("%d", &cadastro_aux.matricula);
+        printf("\nSexo: ");
+        scanf("%d", &cadastro_aux.sexo);
+        printf("\nIdade: ");
+        scanf("%d", &cadastro_aux.idade);
+        printf("\nNome.....: ");
+        fflush(stdin);
+        fgets(cadastro_aux.nome, sizeof(cadastro_aux.nome), stdin);
+        for (int i = 0; i < 4; i++) {
+            cadastro_aux.cursos[i] = 0;
+        }
+
+        int i = 0;
+        do {
+            printf("Informe o curso (1- Seguranca da Informacao / 2- Java / 3- Arduino / 4- Linux / 5 - Python): ");
+            scanf("%d", &cadastro_aux.cursos[i]);
+            if (cadastro_aux.cursos[i] < 1 || cadastro_aux.cursos[i] > 5) {
+                printf("Curso invalido. Por favor, informe um valor entre 1 e 5.\n");
+                continue;
+            }
+            i++;
+            if (i >= 4) {
+                printf("Limite de cursos atingido.\n");
+                break;
+            }
+            printf("Deseja adicionar mais cursos? (1-Sim / 0-Nao): ");
+            scanf("%d", &respoCurso);
+            if (respoCurso != 1) {
+                cadastro_aux.cursos[i] = 0;
+                break;
+            }
+        } while(i < 4);
+
+        printf("\nTurno: ");
+        scanf("%d", &cadastro_aux.turno);
+
+        fseek(pAlunos, 0, SEEK_END);
+        fwrite(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+        printf("\n\nAluno cadastrado com sucesso!\n\n");
+
+        printf("\nDeseja cadastrar outro: (1-sim/0-nao)? ");
+        scanf("%d", &resp);
+    } while (resp == 1);
+}
+
+
+const char *nomeCurso(int curso) {
+    const char *nome_curso;
+    switch (curso) {
+        case 1:
+            nome_curso = "Seguranca da informacao";
+            break;
+        case 2:
+            nome_curso = "Java";
+            break;
+        case 3:
+            nome_curso = "Arduino";
+            break;
+        case 4:
+            nome_curso = "Linux";
+            break;
+        case 5:
+            nome_curso = "Python";
+            break;
+        default:
+            nome_curso = "Curso inexistente";
+            break;
+    }
+    return nome_curso;
+}
+
+const char *sexoAluno(int sexo) {
+  const char *sexo_aluno;
+        switch (sexo) {
+            case 1:
+                sexo_aluno = "Feminino";
+                break;
+            case 2:
+                sexo_aluno = "Masculino";
+                break;
+            default:
+                sexo_aluno = "Sexo Inexistente!";
+                break;
+            }
+
+        return sexo_aluno;
+}
+
+int mensalidadeSeguranca(int turno) {
+    if(turno == 1){
+        return 360.0;
+    } else {
+        return 420.0;
+    }
+}
+
+int mensalidadeJava(int turno) {
+    if(turno == 1){
+        return 320.0;
+    } else {
+        return 390.0;
+    }
+}
+
+int mensalidadeArduino(int turno) {
+    if(turno == 1){
+        return 290.0;
+    } else {
+        return 310.0;
+    }
+}
+
+int mensalidadeLinux(int turno) {
+    if(turno == 1){
+        return 340.0;
+    } else {
+        return 400.0;
+    }
+}
+
+int mensalidadeCursos(int curso, int turno){
+    float mensalidade = 0;
+    switch(curso) {
+        case 1:
+        mensalidade = mensalidadeSeguranca(turno);
+        break;
+
+        case 2:
+        mensalidade = mensalidadeJava(turno);
+        break;
+
+        case 3:
+        mensalidade = mensalidadeArduino(turno);
+        break;
+
+        case 4:
+        mensalidade = mensalidadeLinux(turno);
+        break;
+    }
+    return mensalidade;
+}
+
+int procura(int matp) {
+    int p;
+    p = 0;
+    rewind(pAlunos);
+    fread(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+    while (!feof(pAlunos)) {
+        if (cadastro_aux.matricula == matp)
+            return p;
+        else {
+            fread(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+            p++;
+        }
+    }
+    return -1;
+}
+
+void mostre(int pos) {
+    fseek(pAlunos, pos * sizeof(TCadastro), SEEK_SET);
+    fread(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+    printf("\n\n");
+    linha();
+    printf("\n Matricula Nome Sexo Curso Turno\n");
+    linha();
+    const char *sexo_aluno = sexoAluno(cadastro_aux.sexo);
+    printf("\n%5d %-15s %s", cadastro_aux.matricula, cadastro_aux.nome, sexo_aluno);
+            for (int i = 0; i < 4; i++) {
+                if (cadastro_aux.cursos[i] != 0) {
+                    printf("%s", nomeCurso(cadastro_aux.cursos[i]));
+                    if (i < 3 && cadastro_aux.cursos[i + 1] != 0) {
+                        printf(" ");
+                    }
+                }
+            }
+     printf(" %s", (cadastro_aux.turno == 1) ? "Manha" : "Noite");
+}
+
+void consultar() { 
+    int resp, matcon, posicao;
+    do {
+        cabec();
+        printf("\n\nConsultar Aluno\n\n\n");
+        printf("Matricula do aluno: ");
+        scanf("%d", &matcon);
+        posicao = procura(matcon);
+        if (posicao == -1)
+            printf("\n\nMatricula nao encontrada!\n\n");
+        else
+            mostre(posicao);
+        printf("\n\nDeseja consultar outro (1-sim/0-nao)? ");
+        scanf("%d", &resp);
+    } while (resp == 1);
+}
+
+void remover() { 
+    int matrem, conf, resp, posicao;
+    cadastro_nulo.matricula = 0;
+    do {
+        cabec();
+        printf("\n\nRemover aluno\n\n\n");
+        printf("Matricula: ");
+        scanf("%d", &matrem);
+        posicao = procura(matrem);
+        if (posicao == -1)
+            printf("\nAluno nao encontrado!!");
+        else { 
+            mostre(posicao);
+            printf("\n\nDeseja remover o aluno(1-sim/0-nao)? ");
+            scanf("%d", &conf);
+            if (conf == 1) {
+                fseek(pAlunos, posicao * sizeof(TCadastro), SEEK_SET);
+                fwrite(&cadastro_nulo, sizeof(TCadastro), 1, pAlunos);
+                printf("\n\nAluno removido com sucesso!");
+            } else
+                printf("\nRemocao cancelada!");
+        }
+        printf("\n\n\nDeseja remover outro(1-sim/0-nao)? ");
+        scanf("%d", &resp);
+    } while (resp == 1);
+}
+
+void atualizarMensalidade(int posicao) {
+    float mensalidade_total = 0;
+    int nCursos = 0;
+    for (int i = 0; i < 4; i++) {
+        if (cadastro_aux.cursos[i] != 0) {
+            float mensalidade_curso = mensalidadeCursos(cadastro_aux.cursos[i], cadastro_aux.turno);
+            mensalidade_total += mensalidade_curso;
+            nCursos++;
+        }
+    }
+
+    int desconto_curso = 0;
+    if (cadastro_aux.idade >= 45) {
+        if (nCursos == 1) {
+            desconto_curso = mensalidade_total * 0.15;
+        } else if (nCursos > 1) {
+            desconto_curso = mensalidade_total * 0.30;
+        }
+    } else {
+        if (nCursos > 1) {
+            desconto_curso = mensalidade_total * 0.30;
+        }
+    }
+
+    mensalidade_total -= desconto_curso;
+    cadastro_aux.mensalidade = mensalidade_total;
+    fseek(pAlunos, posicao * sizeof(TCadastro), SEEK_SET);
+    fwrite(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+}
+
+
+void alterar() { 
+    int matalt, conf, resp, posicao;
+    char nome_att[35];
+    do {
+        cabec();
+        printf("\n\nEditar Aluno\n\n\n");
+        printf("Matricula que deseja editar: ");
+        scanf("%d", &matalt);
+        posicao = procura(matalt);
+        if (posicao == -1)
+            printf("\nAluno nao encontrado!!");
+        else {
+            mostre(posicao);
+            printf("\n\n EDITAR: (1- Turno / 2- Nome / 3- Sexo / 4- Curso / 5- Idade) ");
+            scanf("%d", &conf);
+            if (conf == 1) {
+                printf("\nNovo Turno: ");
+                 scanf("%d", &cadastro_aux.turno);
+                 printf("Turno alterada com sucesso! \n\n");
+                 fseek(pAlunos, posicao * sizeof(TCadastro), SEEK_SET);
+                 fwrite(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+                 atualizarMensalidade(posicao);
+                 mostre(posicao);
+            } else if(conf == 2) {
+                printf("\nNovo Nome: ");
+                fflush(stdin);
+                fgets(nome_att, 35, stdin);
+                nome_att[strcspn(nome_att, "\n")] = 0;
+                strcpy(cadastro_aux.nome, nome_att);
+                fseek(pAlunos, posicao * sizeof(TCadastro), SEEK_SET);
+                fwrite(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+                printf("Nome alterado com sucesso! \n\n");
+                mostre(posicao);
+            } else if(conf == 5) {
+                printf("\nNova Idade: ");
+                scanf("%d", &cadastro_aux.idade);
+                printf("Idade alterada com sucesso! \n\n");
+                fseek(pAlunos, posicao * sizeof(TCadastro), SEEK_SET);
+                fwrite(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+                atualizarMensalidade(posicao);
+                mostre(posicao);
+            } else if (conf == 3) {
+                printf("\nNovo Sexo: ");
+                 scanf("%d", &cadastro_aux.sexo);
+                 printf("Sexo alterado com sucesso! \n\n");
+                 fseek(pAlunos, posicao * sizeof(TCadastro), SEEK_SET);
+                 fwrite(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+                 mostre(posicao);
+            } else if (conf == 4) {
+                int curso_att;
+                int curso_pos;
+                printf("\n Digite um novo curso pra inserir: (1- Seguranca da Informacao / 2- Java / 3- Arduino / 4- Linux / 5- Python) \n ");
+                scanf("%d", &curso_att);
+                if (curso_att < 1 || curso_att > 4 ){
+                    printf("Digite um curso válido");
+                } else {
+                    mostre(posicao);
+                    printf("\n SEUS CURSOS: ");
+                    for (int i = 0; i < 4; i++) {
+                    if (cadastro_aux.cursos[i] != 0) {
+                        printf("%d - %s", i + 1, nomeCurso(cadastro_aux.cursos[i]));
+                        if (i < 3 && cadastro_aux.cursos[i + 1] != 0) {
+                        printf(" // ");
+                     }
+                }
+            }
+                    printf("\n Digite o curso que quer excluir: (1- 2 - 3 - 4) \n");
+                    scanf("%d", &curso_pos);
+                    curso_pos--;
+                    cadastro_aux.cursos[curso_pos] = curso_att;
+                    atualizarMensalidade(posicao);
+                    fseek(pAlunos, posicao * sizeof(TCadastro), SEEK_SET);
+                    fwrite(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+                    printf("Curso(s) alterado com sucesso! \n");
+                    mostre(posicao);
+                }
+            }
+            else {
+                printf("\n\nAlteracao cancelada!\n\n");
+            }
+        }
+        printf("\n\nDeseja alterar outro (1-sim/0-nao)? ");
+        scanf("%d", &resp);
+    } while (resp == 1);
+}
+
+void listagem() {
+    cabec();
+    printf("\n\nListagem Geral\n\n\n");
+    linha();
+    printf("\n Matricula   Nome             Sexo      Idade       Cursos                                          Mensalidade");
+    linha();
+
+    rewind(pAlunos);
+    fread(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+
+    while (!feof(pAlunos)) { 
+        if (cadastro_aux.matricula != 0) {
+            const char *sexo_aluno = sexoAluno(cadastro_aux.sexo);
+            float mensalidade_total = 0;
+            int nCursos = 0;
+            char cursosString[200] = "";
+
+            for (int i = 0; i < 4; i++) {
+                if (cadastro_aux.cursos[i] != 0) {
+                    int mensalidade_curso = mensalidadeCursos(cadastro_aux.cursos[i], cadastro_aux.turno);
+                    mensalidade_total += mensalidade_curso;
+                    nCursos++;
+                    strcat(cursosString, nomeCurso(cadastro_aux.cursos[i]));
+                    if (i < 3 && cadastro_aux.cursos[i + 1] != 0) {
+                        strcat(cursosString, " // ");
+                    }
+                }
+            }
+
+            float desconto_curso = 0.0;
+            if (cadastro_aux.idade >= 45) {
+                if (nCursos == 1) {
+                    desconto_curso = mensalidade_total * 0.15;
+                } else if (nCursos > 1) {
+                    desconto_curso = mensalidade_total * 0.30;
+                }
+            } else {
+                if (nCursos > 1) {
+                    desconto_curso = mensalidade_total * 0.30;
+                }
+            }
+
+            mensalidade_total -= desconto_curso;
+
+            printf("\n %-10d %-30s %-15s %-5d %-50s R$%10.2f", cadastro_aux.matricula, cadastro_aux.nome, sexo_aluno, cadastro_aux.idade, cursosString, mensalidade_total);
+        }
+
+        fread(&cadastro_aux, sizeof(TCadastro), 1, pAlunos);
+    }
+
+    linha();
+    printf("\ntecle enter para voltar ao menu...");
+    getchar();
+}
+
+
+
+void listagemPorCurso(FILE *pAlunos, int curso) {
+   TCadastro cadastro_aux;
+   rewind(pAlunos);
+   printf("\n -------------- %s ------------- \n", nomeCurso(curso));
+   int alunoExiste;
+    while (fread(&cadastro_aux, sizeof(TCadastro), 1, pAlunos) == 1) {
+    for (int i = 0; i < 4; i++) {
+         if (cadastro_aux.cursos[i] == curso) {
+            printf("\nMatricula: %d\n", cadastro_aux.matricula);
+            printf("Idade: %d\n", cadastro_aux.idade);
+            printf("Nome: %s", cadastro_aux.nome);
+            printf("Sexo: %s\n", sexoAluno(cadastro_aux.sexo));
+            printf("Turno: %s\n", (cadastro_aux.turno == 1) ? "Manha" : "Noite");
+            alunoExiste = 1;
+            linha();
+        }
+    } 
+
+    }
+    if (!alunoExiste) {
+        printf("Nenhum aluno pelo curso encontrado. Tente novamente!!");
+    }
+    printf("\nTecle enter para voltar ao menu...");
+    getchar();
+}
+
+
+void listagemPorSexo(FILE *pAlunos, int sexo) {
+   TCadastro cadastro_aux;
+   rewind(pAlunos);
+   printf("\n ------------------- %s ------------------- \n", sexoAluno(sexo));
+   int alunoExiste = 0;
+    while (fread(&cadastro_aux, sizeof(TCadastro), 1, pAlunos) == 1) {
+        if (cadastro_aux.sexo == sexo) {
+            printf("\nMatricula: %d\n", cadastro_aux.matricula);
+            printf("Idade: %d\n", cadastro_aux.idade);
+            printf("Nome: %s", cadastro_aux.nome);
+            printf("Curso(s): \n");
+            for (int i = 0; i < 4; i++) {
+                if (cadastro_aux.cursos[i] != 0) {
+                    printf("%s", nomeCurso(cadastro_aux.cursos[i]));
+                    if (i < 3 && cadastro_aux.cursos[i + 1] != 0) {
+                        printf(" // ");
+                    }
+                    alunoExiste = 1;
+                }
+            }
+            printf("\nTurno: %s\n", (cadastro_aux.turno == 1) ? "Manha" : "Noite");
+            linha();
+        } 
+    }
+     if (!alunoExiste) {
+            printf("Nenhum aluno pelo sexo encontrado. Tente novamente!!");
+        }
+    printf("\nTecle enter para voltar ao menu...");
+    getchar();
+
+}
+
+
+int main() { 
+    int op;
+    int curso;
+    int sexo;
+    abre_arquivo();
+    TCadastro cadastros[100];
+    int count = 0;
+    do { 
+        cabec();
+        printf("\n\nOpcoes: \n\n\n");
+        printf(" 1- Cadastrar Aluno\n\n");
+        printf(" 2- Editar Aluno\n\n");
+        printf(" 3- Remover Aluno\n\n");
+        printf(" 4- Listagem geral\n\n");
+        printf(" 5- Listagem Por Curso\n\n");
+        printf(" 6- Listagem por Sexo\n\n");
+        printf(" 0- Sair\n\n");
+        linha();
+        printf("\nInforme a opcao desejada: ");
+        scanf("%d", &op);
+        switch(op) { 
+            case 1: inserir(); break;
+            case 3: remover(); break;
+            case 5: 
+            printf("Informe o curso: (1- Seguranca da Informacao / 2- Java / 3- Arduino / 4- Linux / 5- Python) \n");
+            printf("Opcao:");
+            scanf("%d", &curso);
+      listagemPorCurso(pAlunos, curso); 
+      break;
+            case 2: alterar(); break;
+            case 4: listagem(); break;
+            case 6: 
+            printf("Informe o Sexo: (1- Feminino/ 2- Masculino) \n");
+            printf("Opcao:");
+            scanf("%d", &sexo);
+      listagemPorSexo(pAlunos, sexo); 
+      break;
+            case 7: limpar_arquivo(); break;
+            case 0: 
+            fclose(pAlunos); 
+            break;
+            default: printf("\n\n\aOpcao invalida!");
+                break;
+        }
+    } while (op != 0);
+    return 0;
+}
