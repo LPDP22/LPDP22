@@ -1,0 +1,8 @@
+idade = 18
+idade2 = 27
+print(idade + idade2)
+print(idade2 - idade)
+print(idade * idade2)
+print(idade2 / idade)
+print(idade // idade)
+print(idade % idade)
