@@ -1,0 +1,10 @@
+cupom = input("Digite o cupom: ")
+
+if cupom == "aula1":
+    print("10% de Desconto")
+    
+elif cupom == "aula2":
+    print("15% de desconto")
+    
+else:
+    print("5% de desconto")
