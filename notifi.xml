@@ -160,7 +160,7 @@
             android:layout_height="50dp">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
+                android:id="@+id/viewVoltarTelaPrincipal"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="#038CFC"
